@@ -36,14 +36,6 @@
     .clock { font-size: 3.5rem; font-weight: bold; }
     .weather { font-size: 1.2rem; margin-top: 5px; opacity: 0.9; }
 
-    /* Bouton Assistant IA */
-    .ai-btn {
-      position: absolute; bottom: 30px; right: 30px; z-index: 10;
-      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
-      color: white; padding: 15px 20px; border-radius: 50px; cursor: pointer;
-      backdrop-filter: blur(8px); font-size: 1rem; transition: transform 0.2s;
-    }
-    .ai-btn:active { transform: scale(0.95); }
   </style>
 </head>
 <body>
@@ -60,8 +52,6 @@
     <div class="clock" id="clock">00:00</div>
     <div class="weather" id="weather">Chargement météo...</div>
   </div>
-
-  <button class="ai-btn" onclick="startAIAssistant()">🎙️ Discuter de la photo</button>
 
   <script>
     // 1. Activation du mode Plein Écran
@@ -156,8 +146,8 @@
         const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=12.3714&longitude=-1.5197&current_weather=true');
         const data = await res.json();
         const temp = Math.round(data.current_weather.temperature);
-        const wind = Math.round(data.current_weather.windspeed);
-        document.getElementById('weather').innerText = `Ouagadougou • ${temp}°C • Vent: ${wind} km/h`;
+        const humidity = data.current.relative_humidity_2m;
+        document.getElementById('weather').innerText = `${temp}°C • ${humidity}%`;
       } catch (e) {
         document.getElementById('weather').innerText = "Météo indisponible";
       }
@@ -178,31 +168,6 @@
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') requestWakeLock();
     });
-
-    // 6. Assistant IA (Reconnaissance vocale)
-    function startAIAssistant() {
-      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert("La reconnaissance vocale n'est pas supportée par ce navigateur.");
-        return;
-      }
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'fr-FR';
-      
-      alert("Écoute en cours... Posez votre question sur la photo !");
-      recognition.start();
-
-      recognition.onresult = (event) => {
-        const query = event.results[0][0].transcript;
-        speakResponse(`Vous avez demandé : "${query}". Cette photo montre un souvenir magnifique !`);
-      };
-    }
-
-    function speakResponse(text) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'fr-FR';
-      window.speechSynthesis.speak(utterance);
-    }
   </script>
 </body>
 </html>
